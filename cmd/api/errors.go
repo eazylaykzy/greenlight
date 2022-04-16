@@ -8,7 +8,20 @@ import (
 // logError method is a generic helper for logging an error message. Later this will be upgraded to use
 // structured logging, and record additional information about the request including the HTTP method and URL.
 func (app *application) logError(r *http.Request, err error) {
+	_ = r
 	app.logger.Println(err)
+}
+
+// failedValidationResponse helper writes a 422 Unprocessable Entity and the contents of the errors map from our new
+// Validator type as a JSON response body. Note that the errors' parameter here has the type map[string]string, which
+// is exactly the same as the errors map contained in our Validator type
+func (app *application) failedValidationResponse(w http.ResponseWriter, r *http.Request, errors map[string]string) {
+	app.errorResponse(w, r, http.StatusUnprocessableEntity, errors)
+}
+
+// badRequestResponse for sending a 400 server response code and error back to the client
+func (app *application) badRequestResponse(w http.ResponseWriter, r *http.Request, err error) {
+	app.errorResponse(w, r, http.StatusBadRequest, err.Error())
 }
 
 // errorResponse method is a generic helper for sending JSON-formatted error messages to the client with a given status
