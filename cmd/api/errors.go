@@ -11,6 +11,11 @@ func (app *application) logError(r *http.Request, err error) {
 	app.logger.Println(err)
 }
 
+// badRequestResponse for sending a 400 server response code and error back to the client
+func (app *application) badRequestResponse(w http.ResponseWriter, r *http.Request, err error) {
+	app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+}
+
 // errorResponse method is a generic helper for sending JSON-formatted error messages to the client with a given status
 // code. Note the use of interface{} type for the message parameter, rather than just a string type, as this gives us
 // more flexibility over the values that we can include in the response
