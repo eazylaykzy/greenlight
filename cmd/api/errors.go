@@ -39,6 +39,13 @@ func (app *application) errorResponse(w http.ResponseWriter, r *http.Request, st
 	}
 }
 
+// editConflictResponse error will be sent to client, this is used to mitigate a scenario where there's racing condition
+// between two Go routine trying to update the same document at the same time
+func (app *application) editConflictResponse(w http.ResponseWriter, r *http.Request) {
+	message := "unable to update the record due to an edit conflict, please try again"
+	app.errorResponse(w, r, http.StatusConflict, message)
+}
+
 // serverErrorResponse method will be used when our application encounters an unexpected problem at runtime. It logs
 // the detailed error message, then uses the errorResponse helper to send a 500 Internal Server Error status code and
 // JSON response (containing a generic error message) to the client
