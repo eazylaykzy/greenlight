@@ -208,3 +208,44 @@ func (app *application) deleteMovieHandler(w http.ResponseWriter, r *http.Reques
 		app.serverErrorResponse(w, r, err)
 	}
 }
+
+// listMoviesHandler for the "GET /v1/movies" endpoint
+func (app *application) listMoviesHandler(w http.ResponseWriter, r *http.Request) {
+	// To keep things consistent with our other handlers, we'll define an input struct
+	// to hold the expected values from the request query string
+	var input struct {
+		Title  string
+		Genres []string
+		data.Filters
+	}
+
+	// Initialize a new Validator instance
+	v := validator.New()
+
+	// Call r.URL.Query to get the url.Values map containing the query string data
+	qs := r.URL.Query()
+
+	// Use our helpers to extract the title and genres query string values, falling back
+	// to default of an empty string and an empty slice respectively if they are not provided by the client
+	input.Title = app.readString(qs, "title", "")
+	input.Genres = app.readCSV(qs, "genres", []string{})
+
+	// Get the page and page_size query string values as integers. Notice that we set the default page value to 1 and
+	// default page_size to 20, and that we pass the validator instance as the final argument here
+	input.Filters.Page = app.readInt(qs, "page", 1, v)
+	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
+
+	// Extract the sort query string value, falling back to "id" if it is not provided
+	// by the client (which will imply an ascending sort on movie ID)
+	input.Filters.Sort = app.readString(qs, "sort", "id")
+
+	// Check the Validator instance for any errors and use the failedValidationResponse
+	// helper to send the client a response if necessary
+	if !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	// Dump the contents of the input struct in an HTTP response
+	fmt.Fprintf(w, "%+v\n", input)
+}
