@@ -8,6 +8,7 @@ import (
 // ErrRecordNotFound error. We'll return this from our Get() method when
 // looking up a movie that doesn't exist in our database
 var (
+	ErrEditConflict   = errors.New("edit conflict")
 	ErrRecordNotFound = errors.New("record not found")
 )
 
