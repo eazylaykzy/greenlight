@@ -5,12 +5,12 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
+	"github.com/eazylaykzy/greenlight/internal/data"
+	_ "github.com/lib/pq"
 	"log"
 	"net/http"
 	"os"
 	"time"
-
-	_ "github.com/lib/pq"
 )
 
 // Declare a string containing the application version number. Later we'll generate this automatically at build time
@@ -35,6 +35,7 @@ type config struct {
 // At the moment this only contains a copy of the config struct and a logger.
 type application struct {
 	config config
+	models data.Models
 	logger *log.Logger
 }
 
@@ -77,6 +78,7 @@ func main() {
 	app := &application{
 		config: cfg,
 		logger: logger,
+		models: data.NewModels(db),
 	}
 
 	// Declare an HTTP server with some sensible timeout settings, which listens on the port provided in the config
