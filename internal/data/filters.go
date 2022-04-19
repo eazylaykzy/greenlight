@@ -12,6 +12,14 @@ type Filters struct {
 	SortSafelist []string
 }
 
+func (f Filters) limit() int {
+	return f.PageSize
+}
+
+func (f Filters) offset() int {
+	return (f.Page - 1) * f.PageSize
+}
+
 // sortColumn check that the client-provided Sort field matches one of the entries in our SortSafelist and if it does,
 // extract the column name from the Sort field by stripping the leading hyphen character (if one exists)
 func (f Filters) sortColumn() string {
