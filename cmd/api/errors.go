@@ -16,6 +16,11 @@ func (app *application) logError(r *http.Request, err error) {
 	})
 }
 
+// rateLimitExceededResponse is evoked when there's too many request from the client than the server permits
+func (app *application) rateLimitExceededResponse(w http.ResponseWriter, r *http.Request) {
+	app.errorResponse(w, r, http.StatusTooManyRequests, "rate limit exceeded")
+}
+
 // failedValidationResponse helper writes a 422 Unprocessable Entity and the contents of the errors map from our new
 // Validator type as a JSON response body. Note that the errors' parameter here has the type map[string]string, which
 // is exactly the same as the errors map contained in our Validator type
