@@ -9,6 +9,7 @@ import (
 	"github.com/eazylaykzy/greenlight/internal/mailer"
 	_ "github.com/lib/pq"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -48,6 +49,7 @@ type application struct {
 	config config
 	models data.Models
 	mailer mailer.Mailer
+	wg     sync.WaitGroup
 	logger *jsonlog.Logger
 }
 
