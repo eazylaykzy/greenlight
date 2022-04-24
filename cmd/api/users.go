@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"github.com/eazylaykzy/greenlight/internal/data"
 	"github.com/eazylaykzy/greenlight/internal/validator"
 	"net/http"
@@ -64,21 +63,13 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	// Launch a background goroutine to send the welcome email.
-	go func() {
-		// Run a deferred function which uses recover() to catch any panic, and log an
-		// error message instead of terminating the application.
-		defer func() {
-			if err := recover(); err != nil {
-				app.logger.PrintError(fmt.Errorf("%s", err), nil)
-			}
-		}()
-
+	app.background(func() {
 		// Send the welcome email.
 		err = app.mailer.Send(user.Email, "user_welcome.tmpl", user)
 		if err != nil {
 			app.logger.PrintError(err, nil)
 		}
-	}()
+	})
 
 	// Note that we also change this to send the client a 202 Accepted status code. This status code indicates
 	// that the request has been accepted for processing, but the processing has not been completed.
