@@ -25,9 +25,9 @@ type Mailer struct {
 
 func New(host string, port int, username, password, sender string) Mailer {
 	// Initialize a new mail.Dialer instance with the given SMTP server settings.
-	// We also configure this to use a 5-second timeout whenever we send an email
+	// We also configure this to use a 10-second timeout whenever we send an email
 	dialer := mail.NewDialer(host, port, username, password)
-	dialer.Timeout = 5 * time.Second
+	dialer.Timeout = 10 * time.Second
 
 	// Return a Mailer instance containing the dialer and sender information
 	return Mailer{
