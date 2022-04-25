@@ -11,17 +11,18 @@ import (
 )
 
 const (
-	ScopeActivation = "activation"
+	ScopeActivation     = "activation"
+	ScopeAuthentication = "authentication"
 )
 
 // Token struct to hold the data for an individual token. This includes the
 // plaintext and hashed versions of the token, associated user ID, expiry time and scope.
 type Token struct {
-	Plaintext string
-	Hash      []byte
-	UserID    int64
-	Expiry    time.Time
-	Scope     string
+	Plaintext string    `json:"token"`
+	Hash      []byte    `json:"-"`
+	UserID    int64     `json:"-"`
+	Expiry    time.Time `json:"expiry"`
+	Scope     string    `json:"-"`
 }
 
 func generateToken(userID int64, ttl time.Duration, scope string) (*Token, error) {

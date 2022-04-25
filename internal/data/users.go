@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+var AnonymousUser = &User{}
+
 // User struct represents an individual user. Importantly, notice that the Password
 // field uses the custom password type defined below
 type User struct {
@@ -246,4 +248,9 @@ func (m UserModel) GetForToken(tokenScope, tokenPlaintext string) (*User, error)
 
 	// Return the matching user.
 	return &user, nil
+}
+
+// IsAnonymous check if a User instance is the AnonymousUser.
+func (u *User) IsAnonymous() bool {
+	return u == AnonymousUser
 }
