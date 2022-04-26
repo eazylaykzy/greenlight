@@ -111,9 +111,8 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 		// return the empty string "" if there is no such header found.
 		authorizationHeader := r.Header.Get("Authorization")
 
-		// If there is no Authorization header found, use the contextSetUser() helper that we just made to add the
-		// AnonymousUser to the request context. Then we call the next handler in the chain and return without executing
-		// any of the code below.
+		// If there is no Authorization header found, use the contextSetUser helper to add the AnonymousUser to the
+		// request context. Then we call the next handler in the chain and return without executing any of the code below.
 		if authorizationHeader == "" {
 			r = app.contextSetUser(r, data.AnonymousUser)
 			next.ServeHTTP(w, r)
@@ -158,6 +157,32 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 
 		// Call the contextSetUser helper to add the user information to the request context.
 		r = app.contextSetUser(r, user)
+
+		// Call the next handler in the chain.
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (app *application) requireActivatedUser(next http.HandlerFunc) http.HandlerFunc {
+	// below return can also ignore the HandlerFunc, as the wrapped function satisfy the HandlerFunc signature
+	// and the return can be simplified to: "return func(w http.ResponseWriter, r *http.Request) {}"
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Use the contextGetUser helper to retrieve the user information from the request context.
+		user := app.contextGetUser(r)
+
+		// If the user is anonymous, then call the authenticationRequiredResponse to
+		// inform the client that they should authenticate before trying again.
+		if user.IsAnonymous() {
+			app.authenticationRequiredResponse(w, r)
+			return
+		}
+
+		// If the user is not activated, use the inactiveAccountResponse helper to
+		// inform them that they need to activate their account.
+		if !user.Activated {
+			app.inactiveAccountResponse(w, r)
+			return
+		}
 
 		// Call the next handler in the chain.
 		next.ServeHTTP(w, r)
