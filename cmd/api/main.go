@@ -67,8 +67,10 @@ func main() {
 	// port number 8080 and the environment "development" if no corresponding flags are provided.
 	flag.IntVar(&cfg.port, "port", 8080, "API server port")
 
+	// Use the empty string "" as the default value for the db-dsn command-line flag,
+	// rather than os.Getenv("GREENLIGHT_DB_DSN") that was previously used.
 	// Read DSN (Data Source Name) from the command-line flags into the config struct, or app uses default values
-	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("GREENLIGHT_DB_DSN"), "PostgreSQL DSN")
+	flag.StringVar(&cfg.db.dsn, "db-dsn", "", "PostgreSQL DSN")
 
 	// Read the connection pool settings from command-line flags into the config struct, or app uses default values
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "PostgreSQL max open connections")
