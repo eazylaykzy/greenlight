@@ -17,12 +17,14 @@ import (
 	"time"
 )
 
-// Declare a string containing the application version number. Later we'll generate this automatically at build time
-const version = "1.0.0"
-
 // Create a buildTime variable to hold the executable binary build time. Note that this
 // must be a string type, as the -X linker flag will only work with string variables.
-var buildTime string
+// version will hold the application version number that will be burnt
+//in during build time using Git commit number/or tag.
+var (
+	buildTime string
+	version   string
+)
 
 // Define a config struct to hold all the configuration settings for our application. For now, the only configuration
 // settings will be the network port that we want the server to listen on, and the name of the current operating
