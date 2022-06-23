@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"expvar"
 	"flag"
+	"fmt"
 	"github.com/eazylaykzy/greenlight/internal/data"
 	"github.com/eazylaykzy/greenlight/internal/jsonlog"
 	"github.com/eazylaykzy/greenlight/internal/mailer"
@@ -66,6 +67,7 @@ func main() {
 	// Read the value of the port and env command-line flags into the config struct. Default to using the
 	// port number 8080 and the environment "development" if no corresponding flags are provided.
 	flag.IntVar(&cfg.port, "port", 8080, "API server port")
+	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 
 	// Use the empty string "" as the default value for the db-dsn command-line flag,
 	// rather than os.Getenv("GREENLIGHT_DB_DSN") that was previously used.
@@ -94,8 +96,16 @@ func main() {
 		return nil
 	})
 
-	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
+	// Create a new version boolean flag with the default value of false.
+	displayVersion := flag.Bool("version", false, "Display version and exit")
+
 	flag.Parse()
+
+	// If the version flag value is true, then print out the version number and immediately exit.
+	if *displayVersion {
+		fmt.Printf("Version:\t%s\n", version)
+		os.Exit(0)
+	}
 
 	// Initialize a new jsonlog.Logger which writes any messages *at or above*
 	// the INFO severity level to the standard out stream
