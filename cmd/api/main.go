@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"expvar"
 	"flag"
+	"fmt"
 	"github.com/eazylaykzy/greenlight/internal/data"
 	"github.com/eazylaykzy/greenlight/internal/jsonlog"
 	"github.com/eazylaykzy/greenlight/internal/mailer"
@@ -16,8 +17,14 @@ import (
 	"time"
 )
 
-// Declare a string containing the application version number. Later we'll generate this automatically at build time
-const version = "1.0.0"
+// Create a buildTime variable to hold the executable binary build time. Note that this
+// must be a string type, as the -X linker flag will only work with string variables.
+// version will hold the application version number that will be burnt
+//in during build time using Git commit number/or tag.
+var (
+	buildTime string
+	version   string
+)
 
 // Define a config struct to hold all the configuration settings for our application. For now, the only configuration
 // settings will be the network port that we want the server to listen on, and the name of the current operating
@@ -66,9 +73,12 @@ func main() {
 	// Read the value of the port and env command-line flags into the config struct. Default to using the
 	// port number 8080 and the environment "development" if no corresponding flags are provided.
 	flag.IntVar(&cfg.port, "port", 8080, "API server port")
+	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 
+	// Use the empty string "" as the default value for the db-dsn command-line flag,
+	// rather than os.Getenv("GREENLIGHT_DB_DSN") that was previously used.
 	// Read DSN (Data Source Name) from the command-line flags into the config struct, or app uses default values
-	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("GREENLIGHT_DB_DSN"), "PostgreSQL DSN")
+	flag.StringVar(&cfg.db.dsn, "db-dsn", "", "PostgreSQL DSN")
 
 	// Read the connection pool settings from command-line flags into the config struct, or app uses default values
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "PostgreSQL max open connections")
@@ -92,8 +102,19 @@ func main() {
 		return nil
 	})
 
-	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
+	// Create a new version boolean flag with the default value of false.
+	displayVersion := flag.Bool("version", false, "Display version and exit")
+
 	flag.Parse()
+
+	// If the version flag value is true, then print out the version number and immediately exit.
+	if *displayVersion {
+		fmt.Printf("Version:\t%s\n", version)
+
+		// Print out the contents of the buildTime variable.
+		fmt.Printf("Build time:\t%s\n", buildTime)
+		os.Exit(0)
+	}
 
 	// Initialize a new jsonlog.Logger which writes any messages *at or above*
 	// the INFO severity level to the standard out stream
